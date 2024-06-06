@@ -1,4 +1,5 @@
 # static Draft of how the graph will look like
+# Just visual a thing
 import matplotlib.pyplot as plt
 import numpy as np
 import matplotx                                         # Library to change theme []
