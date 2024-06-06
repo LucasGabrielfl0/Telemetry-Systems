@@ -1,18 +1,20 @@
 #=================================================== DRAFT CODE ===================================================#
-# Code to test changes in the serial read part of the telemetry, without the need to use the plot
+# Code to test the serial read in python
 import serial
 
 #=========================================== COMMUNICATION SETUP ===========================================#
-PC_Port = 'COM4'
-Baud_rate = 9600
-fileName="Motor_Data.csv"
-samples= 3000
+PC_PORT = 'COM7'
+BAUD_RATE = 9600
+# fileName="Motor_Data.csv"
+# samples= 3000
 
 
-ser= serial.Serial(PC_Port, Baud_rate)
+ser= serial.Serial(PC_PORT, BAUD_RATE)
 
 
-
+while True:
+    Stm32_Data= ser.readline().decode('ascii')
+    print(Stm32_Data)
 
 #=========================================== COMMUNICATION SETUP ===========================================#
 
