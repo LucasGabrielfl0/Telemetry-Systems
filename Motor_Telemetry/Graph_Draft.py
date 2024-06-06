@@ -40,7 +40,7 @@ ax2.set_ylim(0, 10000)
 ax2.set_ylabel('Velocuty [RPM]')
 ax2.set_xlabel('time [ms]')
 
-ax3.plot(x, y3,x, y4)
+ax3.plot(x, y3,x, y4,label=['a', 'aaaaaaaaa'])
 ax3.set_title('Temperature: Motor | Motor Controller')
 ax3.grid(True)
 ax3.set_ylim(0, 150)
@@ -64,7 +64,7 @@ ax5.set_xlabel('time [ms]')
 
 # Adjust layout
 plt.tight_layout()
-fig.suptitle(t="NOVA 15 Motor Interface", fontsize=10,fontweight='bold')
+fig.suptitle(t="Powertrain", fontsize=10,backgroundcolor='red',fontweight='bold')
 # Show the plot
 
 plt.show()

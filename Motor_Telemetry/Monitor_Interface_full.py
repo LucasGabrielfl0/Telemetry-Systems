@@ -1,6 +1,10 @@
 #=================================================== DRAFT CODE ===================================================#
 # Mainly used for test live plotting interface
 
+
+
+
+
 #=================================================== LIBRARIES ===================================================#
 from matplotlib import pyplot as plt
 from matplotlib.animation import FuncAnimation
@@ -11,11 +15,17 @@ import matplotx                                         # Library to change them
 plt.style.use(matplotx.styles.dracula)
 
 
+#=================================================== GRAPH PARAMETERS ===================================================#
+RPM_MAX = 10000
+XLIM_MAX= 1000
+
+
 plt.rcParams["figure.figsize"] = (12, 4)
-N = 2*2 ** 10
+MAX_FRAMES = 2*2 ** 10
 LINE_WEIGTH = 2
 
 y=np.zeros(0,float)
+time_c=0
 
 y1_dc=np.zeros(0,float)
 y2_rpm=np.zeros(0,float)
@@ -35,11 +45,11 @@ ax4_volt    = plt.subplot2grid((3, 3), (1, 2))  # ax4 at position (1, 1)
 ax5_current = plt.subplot2grid((3, 3), (2, 2))  # ax4 at position (1, 1)
 
 
-def getvalues(count):
-    global y,t, flip
+def getvalues():
+    global y,t, flip, time_c
     global y1_dc, y2_rpm, y3_temp, y31_temp_ctrl, y4_volt, y5_current
 
-    value=500*np.sin((100 / (10*2** 10)) * 2 * np.pi * count) + 500
+    value=500*np.sin((100 / (10*2** 10)) * 2 * np.pi * time_c) + 500
     y=np.append(y, value)
     y1_dc=y
     y2_rpm=y*5
@@ -48,7 +58,8 @@ def getvalues(count):
     y4_volt=y*0.1
     y5_current=y*0.2
 
-    t=np.append(t, count)
+    t=np.append(t, time_c)
+    time_c= time_c+1
 
 
 
@@ -64,14 +75,14 @@ def create_figure():
     
     # Graph 1: DC
     ax1_dc.set_ylim(0, 1000)
-    ax1_dc.set_xlim(0,200)
+    ax1_dc.set_xlim(0,XLIM_MAX)
     ax1_dc.set_title('DutyCycle')
     ax1_dc.set_ylabel('Percentage [%]')
     ax1_dc.grid(True)
 
     # Graph 2: RPM
     ax2_rpm.set_ylim(0, 10000)
-    ax2_rpm.set_xlim(0,200)
+    ax2_rpm.set_xlim(0,XLIM_MAX)
     ax2_rpm.set_title('Wheel Velocity')
     ax2_rpm.set_ylabel('Velocuty [RPM]')
     ax2_rpm.set_xlabel('time [ms]')
@@ -79,21 +90,22 @@ def create_figure():
 
     # Graph 3: TEMPERATURE
     ax3_temp.set_ylim(0, 150)
-    ax3_temp.set_xlim(0,200)
+    ax3_temp.set_xlim(0,XLIM_MAX)
     ax3_temp.set_title('Temperature: Motor | Motor Controller')
     ax3_temp.set_ylabel('Temperaure [°C]')
     ax3_temp.grid(True)
+    ax3_temp.legend([line3_temp, line31_tempController], ['Motor', 'Controller'], loc="upper left")    
 
     # Graph 4: SUPLY VOLTAGE
     ax4_volt.set_ylim(0, 400)
-    ax4_volt.set_xlim(0,200)
+    ax4_volt.set_xlim(0,XLIM_MAX)
     ax4_volt.set_title('Supply Voltage')
     ax4_volt.set_ylabel('Voltage [V]')
     ax4_volt.grid(True)
 
     # Graph 1: PHASE CURRENT
     ax5_current.set_ylim(0, 256)
-    ax5_current.set_xlim(0,200)
+    ax5_current.set_xlim(0,XLIM_MAX)
     ax5_current.set_title('Phase Current')
     ax5_current.set_ylabel('Current [A]')
     ax5_current.set_xlabel('time [ms]')
@@ -106,7 +118,7 @@ def update_plot(frame, frame_times):
     global y1_dc, y2_rpm, y3_temp, y31_temp_ctrl, y4_volt, y5_current
 
     frame_times[frame] = time.perf_counter()
-    getvalues(frame)
+    getvalues()
     print("Time: ",t[frame],"  volt: ",y[frame])
     time_current=t
     line1_dc.set_data(time_current      , y1_dc)
@@ -128,11 +140,11 @@ def update_plot(frame, frame_times):
 
     #Update Time Axys
     if t[frame] > ax1_dc.get_xlim()[1]:
-        ax1_dc.set_xlim(ax1_dc.get_xlim()[0], ax1_dc.get_xlim()[1] + N / 5)
-        ax2_rpm.set_xlim(ax1_dc.get_xlim()[0], ax1_dc.get_xlim()[1] + N / 5)
-        ax3_temp.set_xlim(ax1_dc.get_xlim()[0], ax1_dc.get_xlim()[1] + N / 5)
-        ax4_volt.set_xlim(ax1_dc.get_xlim()[0], ax1_dc.get_xlim()[1] + N / 5)
-        ax5_current.set_xlim(ax1_dc.get_xlim()[0], ax1_dc.get_xlim()[1] + N / 5)
+        ax2_rpm.set_xlim(ax1_dc.get_xlim()[0], ax1_dc.get_xlim()[1] + MAX_FRAMES / 5)
+        ax3_temp.set_xlim(ax1_dc.get_xlim()[0], ax1_dc.get_xlim()[1] + MAX_FRAMES / 5)
+        ax4_volt.set_xlim(ax1_dc.get_xlim()[0], ax1_dc.get_xlim()[1] + MAX_FRAMES / 5)
+        ax5_current.set_xlim(ax1_dc.get_xlim()[0], ax1_dc.get_xlim()[1] + MAX_FRAMES / 5)
+        ax1_dc.set_xlim(ax1_dc.get_xlim()[0], ax1_dc.get_xlim()[1] + MAX_FRAMES / 5)
         rescale = True
 
     if frame == len(t) - 1:
@@ -145,10 +157,11 @@ def update_plot(frame, frame_times):
 
 fig, ax1_dc, titl, line1_dc ,line2_rpm, line3_temp,line31_tempController, line4_volt, line5_current = create_figure()
 # fig.suptitle("Motor Display")
-frame_times = np.zeros(N)
+fig.suptitle(t="Powertrain: Performance Monitor", fontsize=10,backgroundcolor='red',fontweight='bold')
+frame_times = np.zeros(MAX_FRAMES)
 
 #the animation is the actual loop
-ani = FuncAnimation(fig, update_plot, interval=0, fargs=(frame_times,), repeat=False, frames=list(range(N)), blit=True)
+ani = FuncAnimation(fig, update_plot, interval=0, fargs=(frame_times,), repeat=False, frames=list(range(MAX_FRAMES)), blit=True)
 
 #plot animation
 plt.show()
