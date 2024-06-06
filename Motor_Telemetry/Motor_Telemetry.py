@@ -43,6 +43,7 @@ RPM_data  =[]
 #=================================================== FUNCTIONS ===================================================#
 
 #------------------------------------------------- Read Data from Serial port --------------------------------#
+# Read Data from serial port and stores it in the array
 def read_Serial():
     Stm32_Data= ser.readline().decode('ascii')
     print(Stm32_Data)
@@ -61,6 +62,7 @@ def create_figure():
 
 
 #------------------------------------------------- Saves Data in a .csv file ----------------------------------#
+# saves Data in the .csv file in the specified folder
 def Save_CSV():
     pass
 
