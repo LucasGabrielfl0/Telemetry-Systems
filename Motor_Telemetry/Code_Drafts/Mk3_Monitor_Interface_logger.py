@@ -19,56 +19,57 @@ plt.style.use(matplotx.styles.dracula)
 #=================================================== GRAPH PARAMETERS ===================================================#
 RPM_MAX = 10000
 XLIM_MAX= 1000
-
-
-plt.rcParams["figure.figsize"] = (12, 4)
 MAX_FRAMES = 2*2 ** 10
 LINE_WEIGTH = 2
+
+
 
 y=np.zeros(0,float)
 time_c=0
 
 y1_dc=np.zeros(0,float)
 y2_rpm=np.zeros(0,float)
-y3_temp=np.zeros(0,float)
+y30_Tm=np.zeros(0,float)
 y4_volt=np.zeros(0,float)
 y5_current=np.zeros(0,float)
 
 time_data=np.zeros(0,float)
 flip=1
 
+plt.rcParams["figure.figsize"] = (12, 4)
+
 # Define the layout using subplot2grid
 fig = plt.figure(figsize=(12, 6), tight_layout=True)
-ax1_dc = plt.subplot2grid((3, 3), (0, 0), colspan=2)
-ax2_rpm     = plt.subplot2grid((3, 3), (1, 0), colspan=2, rowspan=2)  # ax2 at position (1, 0)
-ax3_temp    = plt.subplot2grid((3, 3), (0, 2))  # ax3 at position (0, 1)
-ax4_volt    = plt.subplot2grid((3, 3), (1, 2))  # ax4 at position (1, 1)
-ax5_current = plt.subplot2grid((3, 3), (2, 2))  # ax4 at position (1, 1)
+ax1_dc      = plt.subplot2grid((3, 3), (0, 0), colspan=2)
+ax2_rpm     = plt.subplot2grid((3, 3), (1, 0), colspan=2, rowspan=2)
+ax3_temp    = plt.subplot2grid((3, 3), (0, 2))  
+ax4_volt    = plt.subplot2grid((3, 3), (1, 2))  
+ax5_current = plt.subplot2grid((3, 3), (2, 2)) 
 
 
 def getvalues():
     global y,time_data, flip, time_c
-    global y1_dc, y2_rpm, y3_temp, y31_temp_ctrl, y4_volt, y5_current
+    global y1_dc, y2_rpm, y30_Tm, y31_Tc, y4_volt, y5_current
 
     value=500*np.sin((100 / (10*2** 10)) * 2 * np.pi * time_c) + 500
     y=np.append(y, value)
     y1_dc=y
     y2_rpm=y*5
-    y3_temp=y*0.1
-    y31_temp_ctrl=y*0.05
+    y30_Tm=y*0.1
+    y31_Tc=y*0.05
     y4_volt=y*0.1
     y5_current=y*0.2
 
     time_data=np.append(time_data, time_c)
     time_c= time_c+1
 
-
-
+#------------------------------------------------- LINE/FIGURE SETTINGS ----------------------------------------------#
+# Create Figure, Axys and Lines
 def create_figure():
     line1_dc, = ax1_dc.plot([], [], lw=LINE_WEIGTH, label='DC')
     line2_rpm, = ax2_rpm.plot([], [], lw=LINE_WEIGTH, label='Left Line')
-    line3_temp, = ax3_temp.plot([], [], lw=LINE_WEIGTH, label='Left Line')
-    line31_tempController, = ax3_temp.plot([], [], lw=LINE_WEIGTH, label='Left Line')
+    line30_Tm, = ax3_temp.plot([], [], lw=LINE_WEIGTH, label='Left Line')
+    line31_Tc, = ax3_temp.plot([], [], lw=LINE_WEIGTH, label='Left Line')
     line4_volt, = ax4_volt.plot([], [], lw=LINE_WEIGTH, label='Left Line')
     line5_current, = ax5_current.plot([], [], lw=LINE_WEIGTH, label='Left Line')
 
@@ -95,7 +96,7 @@ def create_figure():
     ax3_temp.set_title('Temperature: Motor | Motor Controller')
     ax3_temp.set_ylabel('Temperaure [°C]')
     ax3_temp.grid(True)
-    ax3_temp.legend([line3_temp, line31_tempController], ['Motor', 'Controller'], loc="upper left")    
+    ax3_temp.legend([line30_Tm, line31_Tc], ['Motor', 'Controller'], loc="upper left")    
 
     # Graph 4: SUPLY VOLTAGE
     ax4_volt.set_ylim(0, 400)
@@ -112,20 +113,24 @@ def create_figure():
     ax5_current.set_xlabel('time [ms]')
     ax5_current.grid(True)
 
-    return (fig, ax1_dc, titl, line1_dc, line2_rpm, line3_temp,line31_tempController, line4_volt, line5_current)
+    return (fig, ax1_dc, titl, line1_dc, line2_rpm, line30_Tm,line31_Tc, line4_volt, line5_current)
 
+
+#------------------------------------------------- PLOT UPDATE: BLITING + AUTO AXYS ----------------------------------------------#
+# Animated Plot
 def update_plot(frame, frame_times):
-    global y,time_data
-    global y1_dc, y2_rpm, y3_temp, y31_temp_ctrl, y4_volt, y5_current
+    global time_data
+    global y1_dc, y2_rpm, y30_Tm, y31_Tc, y4_volt, y5_current
 
-    frame_times[frame] = time.perf_counter()
     getvalues()
+    frame_times[frame] = time.perf_counter()
     print("Time: ",time_data[frame],"  volt: ",y[frame])
+
     time_current=time_data
     line1_dc.set_data(time_current      , y1_dc)
     line2_rpm.set_data(time_current     , y2_rpm)
-    line3_temp.set_data(time_current    , y3_temp)
-    line31_tempController.set_data(time_current , y31_temp_ctrl)
+    line30_Tm.set_data(time_current     , y30_Tm)
+    line31_Tc.set_data(time_current     , y31_Tc)
     line4_volt.set_data(time_current    , y4_volt)
     line5_current.set_data(time_current , y5_current)
     
@@ -154,9 +159,9 @@ def update_plot(frame, frame_times):
     if rescale:
         fig.canvas.draw()
     
-    return line1_dc ,line2_rpm, line3_temp,line31_tempController, line4_volt, line5_current,
+    return line1_dc ,line2_rpm, line30_Tm,line31_Tc, line4_volt, line5_current,
 
-fig, ax1_dc, titl, line1_dc ,line2_rpm, line3_temp,line31_tempController, line4_volt, line5_current = create_figure()
+fig, ax1_dc, titl, line1_dc ,line2_rpm, line30_Tm,line31_Tc, line4_volt, line5_current = create_figure()
 fig.suptitle(t="Powertrain: Performance Monitor", fontsize=10,backgroundcolor='red',fontweight='bold')
 frame_times = np.zeros(MAX_FRAMES)
 
@@ -168,7 +173,7 @@ ani = FuncAnimation(fig, update_plot, interval=0, fargs=(frame_times,), repeat=F
 plt.show()
 
 
-def csv_Data_logger(time_data, y1_dc, y2_rpm, y3_temp_motor, y31_temp_ctrl, y4_volt, y5_current):
+def csv_Data_logger(time_data, y1_dc, y2_rpm, y3_temp_motor, y31_Tc, y4_volt, y5_current):
     #Header (Name of each collumn)
     HEADER = ['Time', 'DC', 'RPM','Supply_Voltage','Current', 'Temp_motor', 'Temp_controller']
     
@@ -178,10 +183,10 @@ def csv_Data_logger(time_data, y1_dc, y2_rpm, y3_temp_motor, y31_temp_ctrl, y4_v
         writer.writerow(HEADER)     #
         
         # Saves every array as a column
-        for time_ms, dc, rpm, temp_motor, temp_ctrl, volt, current in zip(time_data, y1_dc, y2_rpm, y3_temp_motor, y31_temp_ctrl, y4_volt, y5_current):
+        for time_ms, dc, rpm, temp_motor, temp_ctrl, volt, current in zip(time_data, y1_dc, y2_rpm, y3_temp_motor, y31_Tc, y4_volt, y5_current):
             writer.writerow([time_ms,dc, rpm, temp_motor, temp_ctrl, volt,current])
     # Done!
     print('[Telemetry Data Logger]: Data saved!, you have [',len(time_data),'] Logs!')
 
 
-csv_Data_logger(time_data, y1_dc, y2_rpm, y3_temp, y31_temp_ctrl, y4_volt, y5_current)
+csv_Data_logger(time_data, y1_dc, y2_rpm, y30_Tm, y31_Tc, y4_volt, y5_current)
