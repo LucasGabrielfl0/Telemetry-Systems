@@ -156,12 +156,12 @@ def update_plot(frame, frame_times):
     return line1_dc ,line2_rpm, line3_temp,line31_tempController, line4_volt, line5_current,
 
 fig, ax1_dc, titl, line1_dc ,line2_rpm, line3_temp,line31_tempController, line4_volt, line5_current = create_figure()
-# fig.suptitle("Motor Display")
 fig.suptitle(t="Powertrain: Performance Monitor", fontsize=10,backgroundcolor='red',fontweight='bold')
 frame_times = np.zeros(MAX_FRAMES)
 
+
+
 #the animation is the actual loop
 ani = FuncAnimation(fig, update_plot, interval=0, fargs=(frame_times,), repeat=False, frames=list(range(MAX_FRAMES)), blit=True)
-
 #plot animation
 plt.show()

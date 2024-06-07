@@ -40,7 +40,7 @@ ax2.set_ylim(0, 10000)
 ax2.set_ylabel('Velocuty [RPM]')
 ax2.set_xlabel('time [ms]')
 
-ax3.plot(x, y3,x, y4,label=['a', 'aaaaaaaaa'])
+ax3.plot(x, y3,x, y4,label='a')
 ax3.set_title('Temperature: Motor | Motor Controller')
 ax3.grid(True)
 ax3.set_ylim(0, 150)

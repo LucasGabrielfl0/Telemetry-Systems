@@ -6,8 +6,11 @@
  # This file contains the Motor/Controller Telemetry system [Monitoring Interface] for tests in the Laboratory.
  # Details of the Physical connections and the circuit can be found on the Github or the Team's Google Drive
  
-# This interface has 2 distinct Modes: USB_READ and RS232_READ
+# This Serial Read has 2 distinct Modes: USB_READ and RS232_READ
 
+# The Plot interface also has 2 modes : Live Feed and Collect Data
+# 1. Live Feed : Plots the Live values
+# 2. Collect Data: Plots and collects all data for the next 1 min
 
 #=================================================== LIBRARIES ===================================================#
 from matplotlib import pyplot as plt

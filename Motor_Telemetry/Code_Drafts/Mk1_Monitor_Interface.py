@@ -43,7 +43,7 @@ def create_figure():
 
     return (fig, axL, titl, linel)
 
-def update(frame, frame_times):
+def update_plot(frame, frame_times):
     global y,t
     frame_times[frame] = time.perf_counter()
     
@@ -74,7 +74,7 @@ fig.suptitle("Motor Display")
 frame_times = np.zeros(N)
 
 #the animation is the actual loop
-ani = FuncAnimation(fig, update, interval=500, fargs=(frame_times,), repeat=False, frames=list(range(N)), blit=True)
+ani = FuncAnimation(fig, update_plot, interval=500, fargs=(frame_times,), repeat=False, frames=list(range(N)), blit=True)
 
 #plot animation
 plt.show()

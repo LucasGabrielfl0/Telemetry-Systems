@@ -11,10 +11,14 @@ BAUD_RATE = 9600
 
 ser= serial.Serial(PC_PORT, BAUD_RATE)
 
-
-while True:
+def read_Serial():
     Stm32_Data= ser.readline().decode('ascii')
     print(Stm32_Data)
+    
+
+
+while True:
+    read_Serial()
 
 #=========================================== COMMUNICATION SETUP ===========================================#
 
