@@ -1,2 +1,2 @@
 # Telemetry-Systems
-Telemetry system
+Repository for Telemetry systems, serial monitors and live data visualization.
