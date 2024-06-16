@@ -1,5 +1,6 @@
 #=================================================== DRAFT CODE ===================================================#
-# Mainly used for test live plotting interface
+# Plots the data in a loop, everytime the graph gets to the maximum number of frames, it resets all data
+# arrays
 
 
 
@@ -19,7 +20,7 @@ plt.style.use(matplotx.styles.dracula)
 #=================================================== GRAPH PARAMETERS ===================================================#
 RPM_MAX = 10000
 XLIM_MAX= 1000
-MAX_FRAMES = 2*2 ** 10
+MAX_FRAMES = 2000
 LINE_WEIGTH = 2
 
 
@@ -46,9 +47,16 @@ ax4_volt    = plt.subplot2grid((3, 3), (1, 2))
 ax5_current = plt.subplot2grid((3, 3), (2, 2)) 
 
 
+def trunc_float(num):
+    return float('%.2f'%(num))
+
+# return's current time since reference in ms
+def current_ms():
+    ms= time.time_ns()/10000000 # current time since epoch
+    return trunc_float(ms)
 
 def reset_arrays():
-    global y,time_data, flip, time_c, current_frame
+    global y,time_data, time_c
     global y1_dc, y2_rpm, y30_Tm, y31_Tc, y4_volt, y5_current
 
     time_c=0
@@ -63,10 +71,11 @@ def reset_arrays():
 
 
 def getvalues():
-    global y,time_data, flip, time_c, current_frame
+    global y,time_data, flip, time_c, start_time, time_c1
     global y1_dc, y2_rpm, y30_Tm, y31_Tc, y4_volt, y5_current
 
-    value=500*np.sin((100 / (10*2** 10)) * 2 * np.pi * time_c) + 500
+    time_c1= trunc_float(current_ms()-start_time)
+    value=500*np.sin((100 / (10*2** 10)) * 2 * np.pi * time_c1) + 500
     y=np.append(y, value)
     y1_dc=y
     y2_rpm=y*5
@@ -75,6 +84,8 @@ def getvalues():
     y4_volt=y*0.1
     y5_current=y*0.2
 
+    time_c1= trunc_float(current_ms()-start_time)
+    time_c=time_c1
     time_data=np.append(time_data, time_c)
     time_c= time_c+1
 
@@ -134,12 +145,12 @@ def create_figure():
 #------------------------------------------------- PLOT UPDATE: BLITING + AUTO AXYS ----------------------------------------------#
 # Animated Plot
 def update_plot(frame, frame_times):
-    global time_data, current_frame
+    global time_data, time_c1
     global y1_dc, y2_rpm, y30_Tm, y31_Tc, y4_volt, y5_current
-    current_frame=frame
     getvalues()
     frame_times[frame] = time.perf_counter()
-    print("Time: ",time_data[frame],"  volt: ",y[frame])
+    # print("Time: ",time_data[frame],"  volt: ",y[frame])
+    print("Time: ",time_data[frame], "  Real Time: ", time_c1,"  volt: ",y[frame])
 
     time_current=time_data
     line1_dc.set_data(time_current      , y1_dc)
@@ -174,7 +185,7 @@ def update_plot(frame, frame_times):
     if rescale:
         fig.canvas.draw()
     
-    if current_frame==MAX_FRAMES-1:
+    if frame==MAX_FRAMES-1:
         reset_arrays()
     
     return line1_dc ,line2_rpm, line30_Tm,line31_Tc, line4_volt, line5_current,
@@ -184,9 +195,9 @@ fig.suptitle(t="Powertrain: Performance Monitor", fontsize=10,backgroundcolor='r
 frame_times = np.zeros(MAX_FRAMES)
 
 
-
+start_time=current_ms()
 #the animation is the actual loop
-ani = FuncAnimation(fig, update_plot, interval=0, fargs=(frame_times,), repeat=True, frames=list(range(MAX_FRAMES)), blit=True)
+ani = FuncAnimation(fig, update_plot, interval=1, fargs=(frame_times,), repeat=True, frames=list(range(MAX_FRAMES)), blit=True)
 #plot animation
 plt.show()
 

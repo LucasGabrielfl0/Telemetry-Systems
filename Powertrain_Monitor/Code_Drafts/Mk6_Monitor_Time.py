@@ -14,16 +14,12 @@ from matplotlib.animation import FuncAnimation          # Animation
 import matplotx                                         # Library to change theme []
 import numpy as np
 import time
-import serial
 import re
 import csv
 
 plt.style.use(matplotx.styles.dracula)
 
 #=================================================== COMMUNICATION SETUP =================================================#
-PC_PORT = 'COM7'
-BAUD_RATE = 9600
-ser= serial.Serial(PC_PORT, BAUD_RATE)
 
 # Empty Arrays of data
 y1_dc       = np.zeros(0,float)
@@ -34,25 +30,36 @@ y4_volt     = np.zeros(0,float)
 y5_current  = np.zeros(0,float)
 time_data   = np.zeros(0,float)
 
-#=================================================== READ SERIAL ===================================================#
-# Read Data from serial port and stores it's values in the array
-def read_Serial():
-    global y1_dc, y2_rpm, y31_temp_m, y32_temp_c, y4_volt, y5_current, time_data
-    
-    # Read Serial Data
-    Stm32_Data= ser.readline().decode('ascii')
-    print(Stm32_Data) 
-    
-    # Get only the numbers from serial data
-    Data_Array=re.findall(r'\d+', Stm32_Data)
+# Resets data arrays
+def reset_data():
+    global y1_dc, y2_rpm, y30_Tm, y31_Tc, y4_volt, y5_current, time_data
 
-    # Get Current Values for each variable
-    dc_c        = float(Data_Array[3])
-    rpm_c       = float(Data_Array[4])
-    Tm_c        = float(Data_Array[5])
-    Tc_c        = float(Data_Array[6])
-    volt_c      = float(Data_Array[7])
-    current_c   = float(Data_Array[8])
+    y1_dc       = np.zeros(0,float)
+    y2_rpm      = np.zeros(0,float)
+    y30_Tm      = np.zeros(0,float)
+    y31_Tc      = np.zeros(0,float)
+    y4_volt     = np.zeros(0,float)
+    y5_current  = np.zeros(0,float)
+    time_data   = np.zeros(0,float)
+
+
+#=================================================== READ SINE ===================================================#
+def getvalues():
+    global time_data, time_c
+    global y1_dc, y2_rpm, y30_Tm, y31_Tc, y4_volt, y5_current
+
+    value=500*np.sin((100 / (10*2** 10)) * 2 * np.pi * time_c) + 500
+
+    time_data=np.append(time_data, time_c)
+    time_c= time_c+1
+
+    # time_c      = float(Data_Array[0])
+    dc_c        = value
+    rpm_c       = value*5
+    Tm_c        = value*0.1
+    Tc_c        = value*0.05
+    volt_c      = value*0.1
+    current_c   = value*0.2
     
     # Add the current value to the Data array
     y1_dc       = np.append(y1_dc       , dc_c)
@@ -62,6 +69,7 @@ def read_Serial():
     y4_volt     = np.append(y4_volt     , volt_c)
     y5_current  = np.append(y5_current  , current_c)
     # time_data   = np.append(time_data   , time_c)
+
 
 #=================================================== CSV DATA LOGGER ===================================================#
 # saves Data in the .csv file in the specified folder
@@ -158,7 +166,7 @@ def update_plot(frame, frame_times):
     global time_data
     global y1_dc, y2_rpm, y30_Tm, y31_Tc, y4_volt, y5_current
 
-    read_Serial()
+    getvalues()
     frame_times[frame] = time.perf_counter()
     print("Time: ",time_data[frame],"  volt: ",y1_dc[frame])
 
@@ -192,9 +200,15 @@ def update_plot(frame, frame_times):
     if frame == len(time_data) - 1:
         rescale = True
     
+    # If graph is out of bounds, resets graph
     if rescale:
         fig.canvas.draw()
-    
+
+    # If the graph got to the Last frame, resets arrays
+    if frame==MAX_FRAMES-1:
+        reset_data()
+
+    # Returns the changes in the graph
     return line1_dc ,line2_rpm, line30_Tm,line31_Tc, line4_volt, line5_current,
 
 
@@ -205,8 +219,8 @@ frame_times = np.zeros(MAX_FRAMES)
 
 
 #plot animation
-ani = FuncAnimation(fig, update_plot, interval=0, fargs=(frame_times,), repeat=False, frames=list(range(MAX_FRAMES)), blit=True)
+ani = FuncAnimation(fig, update_plot, interval=0, fargs=(frame_times,), repeat=True, frames=list(range(MAX_FRAMES)), blit=True)
 plt.show()
 
-# When the Animation is done, saves .csv
+# When the Animation is closed, saves all arrays in a .csv
 csv_Data_logger(time_data, y1_dc, y2_rpm, y30_Tm, y31_Tc, y4_volt, y5_current)
