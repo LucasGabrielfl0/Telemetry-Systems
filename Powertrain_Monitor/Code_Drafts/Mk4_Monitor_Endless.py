@@ -34,7 +34,6 @@ y4_volt=np.zeros(0,float)
 y5_current=np.zeros(0,float)
 
 time_data=np.zeros(0,float)
-flip=1
 
 plt.rcParams["figure.figsize"] = (12, 4)
 
@@ -49,7 +48,7 @@ ax5_current = plt.subplot2grid((3, 3), (2, 2))
 
 
 def reset_arrays():
-    global y,time_data, flip, time_c, current_frame
+    global y,time_data, time_c, current_frame
     global y1_dc, y2_rpm, y30_Tm, y31_Tc, y4_volt, y5_current
 
     time_c=0
@@ -64,7 +63,7 @@ def reset_arrays():
 
 
 def getvalues():
-    global y,time_data, flip, time_c, current_frame
+    global y,time_data, time_c, current_frame
     global y1_dc, y2_rpm, y30_Tm, y31_Tc, y4_volt, y5_current
 
     value=500*np.sin((100 / (10*2** 10)) * 2 * np.pi * time_c) + 500
@@ -99,7 +98,7 @@ def create_figure():
     ax1_dc.grid(True)
 
     # Graph 2: RPM
-    ax2_rpm.set_ylim(0, 10000)
+    ax2_rpm.set_ylim(0, 12000)
     ax2_rpm.set_xlim(0,XLIM_MAX)
     ax2_rpm.set_title('Wheel Velocity')
     ax2_rpm.set_ylabel('Velocuty [RPM]')
