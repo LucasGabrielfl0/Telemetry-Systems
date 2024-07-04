@@ -26,23 +26,24 @@ def NewArrays():
     y4          = np.zeros(0,float)
     y5          = np.zeros(0,float)
     time_data   = np.zeros(0,float)
+    start_time  = 0
     
-    return time_data, y1, y2, y30, y31, y4, y5
+    return time_data, y1, y2, y30, y31, y4, y5, start_time
 
 
 
 
 # Read Data from serial port and stores it's values in the array
 # message example:'[CAN]: | TIME: 500.12 | PWM= 100.11% |  RPM= 300 | Vs=301.45 V | Ic= 200 A |  Tm= 20 °C | Tc= 21 °C'
-def ReadSerial(time_data, y1_dc, y2_rpm, y30_Tm, y31_Tc, y4_volt, y5_current):
+def ReadSerial(start_time, time_data, y1_dc, y2_rpm, y30_Tm, y31_Tc, y4_volt, y5_current):
     # Keeps reading until finds right msg
     while True:
-        Stm32_Data= ser.readline().decode('utf8')   # Read Serial  
-        if ID_confirm(Stm32_Data):                  # Confirms if its the CAN msg
+        Stm32_Data= ser.readline().decode('utf8')           # Read Serial  
+        if ID_confirm(Stm32_Data):                          # Confirms if its the CAN msg
+            Data_Array=re.findall(r"[\d.]+", Stm32_Data)    # Get only the numbers from serial data
             break
-        print(Stm32_Data)  
-
-    Data_Array=re.findall(r"[\d.]+", Stm32_Data)    # Get only the numbers from serial data
+        
+        # print(Stm32_Data)  
     print(Data_Array)
     
     # Get Current Values for each variable
@@ -54,6 +55,8 @@ def ReadSerial(time_data, y1_dc, y2_rpm, y30_Tm, y31_Tc, y4_volt, y5_current):
     Tm_c        = int(Data_Array[5])
     Tc_c        = int(Data_Array[6])
 
+    time_c   = time_c - start_time
+
     # Add the current value to the Data array
     time_data   = np.append(time_data   , time_c)
     y1_dc       = np.append(y1_dc       , dc_c)
@@ -63,10 +66,8 @@ def ReadSerial(time_data, y1_dc, y2_rpm, y30_Tm, y31_Tc, y4_volt, y5_current):
     y4_volt     = np.append(y4_volt     , volt_c)
     y5_current  = np.append(y5_current  , current_c)
 
-    # Time starts from 0
-    start_time  = time_data[0]
-    time_data   = time_data - start_time
-    
+
+
     # Returns all arrays
-    return time_data, y1_dc, y2_rpm, y30_Tm, y31_Tc, y4_volt, y5_current
+    return start_time, time_data, y1_dc, y2_rpm, y30_Tm, y31_Tc, y4_volt, y5_current
 

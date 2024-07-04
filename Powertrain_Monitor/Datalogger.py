@@ -11,7 +11,7 @@ def csv_Data_logger(time_data, y1_dc, y2_rpm, y3_temp_motor, y31_Tc, y4_volt, y5
     HEADER = ['Time', 'DC', 'RPM','Supply_Voltage','Current', 'Temp_motor', 'Temp_controller']
     
     #Save data in a .csv file
-    with open('Software/Telemetry-Systems/Motor_Telemetry/Powertrain_Monitor/CSV_Folder/MOTOR_DATA.csv', 'w', encoding='UTF8', newline='') as f:
+    with open('Software/Telemetry-Systems/Powertrain_Monitor/CSV_Folder/MOTOR_DATA.csv', 'w', encoding='UTF8', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(HEADER)
         

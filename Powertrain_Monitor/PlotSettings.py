@@ -1,6 +1,9 @@
 from matplotlib import pyplot as plt
-RPM_MAX = 10000
-XLIM_MAX= 1000
+
+DC_MAX      = 100
+RPM_MAX     = 10000
+
+XLIM_MAX    = 200
 LINE_WEIGTH = 2
 
 MAX_FRAMES = 2000
@@ -33,14 +36,14 @@ def create_figure():
     titl = ax1_dc.set_title('Left Plot Title')
     
     # Graph 1: DC
-    ax1_dc.set_ylim(0, 1000)
+    ax1_dc.set_ylim(0, DC_MAX)
     ax1_dc.set_xlim(0,XLIM_MAX)
     ax1_dc.set_title('DutyCycle')
     ax1_dc.set_ylabel('Percentage [%]')
     ax1_dc.grid(True)
 
     # Graph 2: RPM
-    ax2_rpm.set_ylim(0, 10000)
+    ax2_rpm.set_ylim(0, RPM_MAX)
     ax2_rpm.set_xlim(0,XLIM_MAX)
     ax2_rpm.set_title('Wheel Velocity')
     ax2_rpm.set_ylabel('Velocuty [RPM]')

@@ -18,23 +18,36 @@ import numpy as np
 import time
 
 # Custom Libs
-from Datalogger import *
-# from SerialReader import *
-from SineTest import *
-from PlotSettings import *
+from Datalogger     import *
+from SerialReader   import *
+from SineTest       import *
+from PlotSettings   import *
+
+
+TEST_MODE = False
+if TEST_MODE:
+    ReadSerial  =   ReadTest
+    NewArrays   =   NewArraysTest
+else:
+    ReadSerial  =   ReadSerial
+    NewArrays   =   NewArrays
+
 
 
 #================================================ PLOT UPDATE: BLITING + AUTO AXYS ================================================#
 # Animated Plot
 def update_plot(frame, frame_times):
-    global time_data, time_c
-    global y1_dc, y2_rpm, y30_Tm, y31_Tc, y4_volt, y5_current,y
+    global time_data, start_time
+    global y1_dc, y2_rpm, y30_Tm, y31_Tc, y4_volt, y5_current
 
     # Update Values
-    #time_data, y1_dc, y2_rpm, y30_Tm, y31_Tc, y4_volt, y5_current = ReadSerial(time_data, y1_dc, y2_rpm, y30_Tm, y31_Tc, y4_volt, y5_current)
-    # Test mode:
-    time_data, y1_dc, y2_rpm, y30_Tm, y31_Tc, y4_volt, y5_current, y , time_c= ReadTest(time_data, y1_dc, y2_rpm, y30_Tm, y31_Tc, y4_volt, y5_current, y , time_c)
+    start_time,time_data, y1_dc, y2_rpm, y30_Tm, y31_Tc, y4_volt, y5_current = ReadSerial(start_time,time_data, y1_dc, y2_rpm, y30_Tm, y31_Tc, y4_volt, y5_current)
     
+    if time_data[0]>0:
+        start_time= time_data[0]
+        time_data = time_data - start_time
+
+
     frame_times[frame] = time.perf_counter()
     print("Time: ",time_data[frame],"  volt: ",y1_dc[frame])
 
@@ -60,11 +73,11 @@ def update_plot(frame, frame_times):
 
     # If time out of bounds, updates Time Axys
     if time_data[frame] > ax1_dc.get_xlim()[1]:
-        ax2_rpm.set_xlim(ax1_dc.get_xlim()[0], ax1_dc.get_xlim()[1] + MAX_FRAMES / 5)
-        ax3_temp.set_xlim(ax1_dc.get_xlim()[0], ax1_dc.get_xlim()[1] + MAX_FRAMES / 5)
-        ax4_volt.set_xlim(ax1_dc.get_xlim()[0], ax1_dc.get_xlim()[1] + MAX_FRAMES / 5)
-        ax5_current.set_xlim(ax1_dc.get_xlim()[0], ax1_dc.get_xlim()[1] + MAX_FRAMES / 5)
-        ax1_dc.set_xlim(ax1_dc.get_xlim()[0], ax1_dc.get_xlim()[1] + MAX_FRAMES / 5)
+        ax2_rpm.set_xlim(ax1_dc.get_xlim()[0], ax1_dc.get_xlim()[1] + XLIM_MAX / 5)
+        ax3_temp.set_xlim(ax1_dc.get_xlim()[0], ax1_dc.get_xlim()[1] + XLIM_MAX / 5)
+        ax4_volt.set_xlim(ax1_dc.get_xlim()[0], ax1_dc.get_xlim()[1] + XLIM_MAX / 5)
+        ax5_current.set_xlim(ax1_dc.get_xlim()[0], ax1_dc.get_xlim()[1] + XLIM_MAX / 5)
+        ax1_dc.set_xlim(ax1_dc.get_xlim()[0], ax1_dc.get_xlim()[1] + XLIM_MAX / 5)
         rescale = True
 
     if frame == len(time_data) - 1:
@@ -74,8 +87,7 @@ def update_plot(frame, frame_times):
         fig.canvas.draw()
 
     if frame==MAX_FRAMES-1:     # If the graph got to the Last frame, saves the arrays and resets them
-        # time_data , y1_dc , y2_rpm , y30_Tm , y31_Tc , y4_volt , y5_current = NewArrays()
-        time_data, y1_dc , y2_rpm , y30_Tm , y31_Tc , y4_volt , y5_current, y, time_c = NewArraysTest() # Test
+        time_data , y1_dc , y2_rpm , y30_Tm , y31_Tc , y4_volt , y5_current, start_time = NewArrays()
         csv_Data_logger(time_data , y1_dc , y2_rpm , y30_Tm , y31_Tc , y4_volt , y5_current)
     
     # Returns the changes in the graph
@@ -83,8 +95,7 @@ def update_plot(frame, frame_times):
 
 
 #=================================================== MAIN ===================================================#
-# time_data , y1_dc , y2_rpm , y30_Tm , y31_Tc , y4_volt , y5_current = NewArrays()
-time_data, y1_dc , y2_rpm , y30_Tm , y31_Tc , y4_volt , y5_current, y, time_c = NewArraysTest() # Test
+time_data , y1_dc , y2_rpm , y30_Tm , y31_Tc , y4_volt , y5_current, start_time = NewArrays()
 
 fig, ax1_dc, ax2_rpm, ax3_temp , ax4_volt, ax5_current, titl, line1_dc, line2_rpm, line30_Tm,line31_Tc, line4_volt, line5_current = create_figure()
 fig.suptitle(t="Powertrain: Performance Monitor", fontsize=10,backgroundcolor='red',fontweight='bold')
